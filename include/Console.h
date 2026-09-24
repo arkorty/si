@@ -19,6 +19,7 @@ public:
     void registerGame(std::unique_ptr<IGame> game);
 
     void onKey(int key, int action);
+    void onChar(unsigned int codepoint);
     void onResize(int width, int height);
 
 private:
@@ -26,7 +27,10 @@ private:
     void update(float dt);
     void render();
     void handleInput();
+
+    // Menu UI
     void renderMenu();
+    void launchGame(int index);
 
     GLFWwindow* window = nullptr;
     GameContext ctx;
@@ -35,8 +39,10 @@ private:
     InputManager inputManager;
 
     std::vector<std::unique_ptr<IGame>> games;
-    int selectedGame = 0;
     int currentGame = -1;
+    int selectedGame = 0;
+    int viewportX = 0;
+    int viewportY = 0;
     bool inMenu = true;
     bool shouldExit = false;
 
@@ -44,4 +50,5 @@ private:
 };
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void charCallback(GLFWwindow* window, unsigned int codepoint);
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);

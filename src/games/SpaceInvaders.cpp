@@ -280,14 +280,11 @@ bool SpaceInvadersGame::allEnemiesDead() {
 
 void SpaceInvadersGame::render(GameContext& ctx) {
     Renderer* r = ctx.renderer;
-    r->beginFrame();
 
     if (!gameOver && !victory) {
         drawGame(r);
     }
     drawUI(r);
-
-    r->endFrame();
 }
 
 void SpaceInvadersGame::drawGame(Renderer* r) {

@@ -1,7 +1,8 @@
-Retro Console - Virtual Console with Space Invaders
-====================================================
+si - Virtual Console
+====================
 
-A modern OpenGL 3.3 Core Profile virtual console with Space Invaders clone.
+A modern OpenGL 3.3 Core Profile virtual console with a BASIC-style
+command shell and three arcade games: Space Invaders, Asteroids, and Pong.
 
 Requirements (macOS with Homebrew)
 ----------------------------------
@@ -9,101 +10,90 @@ Requirements (macOS with Homebrew)
 - GLFW 3.3+
 - GLEW 2.1+
 - GLM (header-only math library)
-- C++17 compatible compiler (clang++ from Xcode Command Line Tools)
+- C++17 compiler (clang++ from Xcode Command Line Tools)
 
 Installation
 ------------
-1. Install Homebrew if not already installed:
-   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-2. Install dependencies:
-   brew install cmake glfw glew glm
+brew install cmake glfw glew glm
 
 Building
 --------
-mkdir build
-cd build
+mkdir build && cd build
 cmake ..
 make
 
 Running
 -------
-cd build
-./RetroConsole
+./si
 
-Controls (Menu)
----------------
-- UP / W: Navigate up
-- DOWN / S: Navigate down
-- ENTER / SPACE: Select game
-- ESC: Quit console
+BASIC Shell (Menu)
+------------------
+Type a game name and press ENTER to play.
 
-Controls (Space Invaders)
--------------------------
-- LEFT / A: Move left
-- RIGHT / D: Move right
-- SPACE / UP / W: Shoot
-- ESC: Return to menu
-- R: Restart game (after Game Over or Victory)
-- N: Next wave (after Victory)
+Commands:
+  LIST              List available games
+  RUN <NAME>        Start a game
+  <NAME>            Start a game (e.g. ASTEROIDS)
+  0 / 1 / 2         Start by program number from LIST
+  CLS               Clear screen
+  HELP              Show help
+  BYE               Quit
 
-Gameplay
---------
-- Destroy all enemies to win
-- Enemies move in discrete grid steps (classic style)
-- Enemies drop down when they hit screen edges
-- Enemies speed up as their numbers thin out
-- If enemies reach your ship: Game Over
-- Score: 10-30 points per enemy (top rows worth more)
-- 3 lives; bullets can kill you; wave increases difficulty
+Keys:
+  ENTER   Execute command
+  BACKSPACE  Delete character
+  ESC     Quit (at prompt) / return to shell (in game)
 
-Architecture
-------------
+Game names are case-insensitive and ignore spaces:
+  SPACE INVADERS, SPACEINVADERS, Space Invaders all work.
+
+Controls (All Games)
+--------------------
+- ESC : Back to BASIC shell
+
+Space Invaders
+  LEFT/RIGHT or A/D : Move
+  SPACE / UP / W    : Shoot
+  R                 : Restart (after game over)
+  N                 : Next wave (after victory)
+
+Asteroids
+  LEFT/RIGHT or A/D : Rotate ship
+  UP / W            : Thrust
+  SPACE             : Fire
+  P                 : Pause
+  R                 : Restart (after game over)
+
+Pong
+  W / S       : Left paddle
+  UP / DOWN   : Right paddle (2P mode)
+  T           : Toggle 1P vs CPU / 2P versus
+  R           : Restart (after game over)
+
+Project Structure
+-----------------
 include/
-  Game.h              - IGame interface (all games implement this)
-  Renderer.h          - Modern OpenGL 3.3 Core renderer
-  InputManager.h      - Keyboard input + GameContext struct
-
+  Game.h              - IGame interface
+  Console.h           - Virtual console + BASIC shell
+  Renderer.h          - OpenGL renderer + bitmap font
+  InputManager.h      - Keyboard input + GameContext
 src/
   main.cpp            - Entry point
-  Console.cpp/h       - Virtual console: menu, game lifecycle, window/input
-  Renderer.cpp        - Shader loading, VAO/VBO/EBO batching, draw calls
+  Console.cpp         - BASIC shell, game lifecycle, window
+  Renderer.cpp        - Shaders, VAO/VBO batching, drawRect, drawText
   games/
-    SpaceInvaders.cpp/h - Space Invaders implementation
-
+    SpaceInvaders.*   - Space Invaders
+    Asteroids.*       - Asteroids
+    Pong.*            - Pong (with CPU opponent)
 shaders/
-  sprite.vert         - Vertex shader (projection transform)
-  sprite.frag         - Fragment shader (vertex color output)
+  sprite.vert/frag    - Sprite rendering shaders
 
 Adding a New Game
 -----------------
-1. Create src/games/MyGame.h and MyGame.cpp
-2. Implement the IGame interface (see SpaceInvaders.h for reference)
-3. Register it in Console::init() in src/Console.cpp:
+1. Create src/games/MyGame.h and MyGame.cpp implementing IGame
+2. Register in Console::init():
      registerGame(std::make_unique<MyGame>());
-4. Add MyGame.cpp to CMakeLists.txt sources
-
-Key Design Notes
-----------------
-- OpenGL 3.3 Core Profile (no deprecated fixed-function pipeline)
-- All drawing uses drawRect() - colored quads batched into a single draw call
-- Positions are in NDC [-1, 1]; pos parameter is the bottom-left corner
-- Delta-time based movement (frame-rate independent)
-- Vertex colors, no textures needed (textures can be added later)
-- GLEW required for OpenGL function loading on macOS
-
-Troubleshooting
----------------
-If CMake can't find GLFW/GLEW:
-  brew install pkg-config
-  Then re-run cmake
-
-If you see "GL error" messages in the console, note the hex code:
-  0x0500 = GL_INVALID_ENUM
-  0x0501 = GL_INVALID_VALUE
-  0x0502 = GL_INVALID_OPERATION
-
-On Apple Silicon (M1/M2/M3): works natively.
+3. Add MyGame.cpp to CMakeLists.txt sources
 
 License
 -------
